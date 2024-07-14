@@ -5,36 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Page</title>
     <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f5e6d3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .login-container {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
+      h2 {
+        color: #8c1c13;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+      label {
+        color: #8c1c13;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="email"],
+      input[type="password"] {
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #d9a577;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      input[type="submit"] {
+        background-color: #8c1c13;
+        color: #ffffff;
+        border: none;
+        padding: 12px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      input[type="submit"]:hover {
+        background-color: #6e160f;
+      }
       .error {
-        border: 2px solid red;
+        border: 2px solid #8c1c13 !important;
       }
       .error-message {
-        color: red;
+        color: #8c1c13;
+        font-size: 14px;
+        margin-top: -15px;
+        margin-bottom: 15px;
         display: none;
       }
     </style>
   </head>
   <body>
-    <h2>Login</h2>
-    <form
-      id="loginForm"
-      action="login.php"
-      method="post"
-      onsubmit="return validateForm()"
-    >
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required /><br />
-      <span id="emailError" class="error-message">Please enter your email</span
-      ><br />
+    <div class="login-container">
+      <h2>Login</h2>
+      <form
+        id="loginForm"
+        action="login.php"
+        method="post"
+        onsubmit="return validateForm()"
+      >
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required />
+        <span id="emailError" class="error-message"
+          >Please enter your email</span
+        >
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required /><br />
-      <span id="passwordError" class="error-message"
-        >Please enter your password</span
-      ><br />
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+        <span id="passwordError" class="error-message"
+          >Please enter your password</span
+        >
 
-      <input type="submit" value="Login" />
-    </form>
+        <input type="submit" value="Login" />
+      </form>
+    </div>
 
     <script>
       function validateForm() {
