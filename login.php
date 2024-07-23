@@ -2,47 +2,57 @@
 session_start();
 
 // Database connection details
-$host = "localhost";
-$dbname = "your_database_name";
-$username = "your_username";
-$password = "your_password";
+$config = [
+    'host' => 'localhost',
+    'dbname' => 'your_database_name',
+    'username' => 'your_username',
+    'password' => 'your_password'
+];
 
 // Create connection
-$conn = new mysqli($host, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+try {
+    $pdo = new PDO(
+        "mysql:host={$config['host']};dbname={$config['dbname']};charset=utf8mb4",
+        $config['username'],
+        $config['password'],
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]
+    );
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
 }
+
+$error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST["email"];
-    $password = $_POST["password"];
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $password = $_POST["password"] ?? '';
 
-    // Prepare and execute query
-    $stmt = $conn->prepare("SELECT id, email, password FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows == 1) {
-        $user = $result->fetch_assoc();
-        if (password_verify($password, $user["password"])) {
-            $_SESSION["user_id"] = $user["id"];
-            $_SESSION["email"] = $user["email"];
-            header("Location: dashboard.php");
-            exit();
-        } else {
-            $error = "Invalid email or password";
-        }
+    if (!$email || !$password) {
+        $error = "Please provide both email and password.";
     } else {
-        $error = "Invalid email or password";
+        try {
+            $stmt = $pdo->prepare("SELECT id, email, password FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user["password"])) {
+                $_SESSION["user_id"] = $user["id"];
+                $_SESSION["email"] = $user["email"];
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                $error = "Invalid email or password";
+            }
+        } catch (PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            $error = "An error occurred. Please try again later.";
+        }
     }
-
-    $stmt->close();
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -53,11 +63,9 @@ $conn->close();
     <title>Login Result</title>
 </head>
 <body>
-    <?php
-    if (isset($error)) {
-        echo "<p>Error: $error</p>";
-        echo "<p><a href='index.html'>Try again</a></p>";
-    }
-    ?>
+    <?php if ($error): ?>
+        <p>Error: <?= htmlspecialchars($error) ?></p>
+        <p><a href='index.html'>Try again</a></p>
+    <?php endif; ?>
 </body>
 </html>
